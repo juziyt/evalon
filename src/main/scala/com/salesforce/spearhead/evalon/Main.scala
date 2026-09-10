@@ -59,7 +59,7 @@ If you have no useful information, recommendations, or actions to contribute, re
 
     val scenario = ScenarioLoader.load(scenarioPath) match
       case Right(s) => s
-      case Left(e)  => throw RuntimeException(s"Failed to load scenario: $e")
+      case Left(e) => throw RuntimeException(s"Failed to load scenario: $e")
 
     println(s"Running scenario: ${scenario.name}")
     println(s"Conversations: ${scenario.conversations.map(_.name)}")

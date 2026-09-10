@@ -118,8 +118,7 @@ Respond with only your message content. Your output is delivered to the other pa
       config: ParticipantConfig,
       llm: Llm,
       runner: ActorRef[ScenarioRunner.Command],
-      conversations: Map[String, ConversationConfig] = Map.empty,
-      zeroThinkingDelay: Boolean = false
+      conversations: Map[String, ConversationConfig] = Map.empty
   ): Behavior[Cmd] =
     val setup = Setup(config, llm, runner, conversations)
     Behaviors.withTimers(timers => idle(setup, Map.empty, timers))
