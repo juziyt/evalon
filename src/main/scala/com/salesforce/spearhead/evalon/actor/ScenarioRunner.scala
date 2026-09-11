@@ -22,11 +22,11 @@ import org.apache.pekko.actor.typed.scaladsl.Behaviors
 import org.apache.pekko.actor.typed.{ActorRef, Behavior}
 
 import com.salesforce.spearhead.evalon.agent.Agent
-import com.salesforce.spearhead.evalon.llm.AnthropicClient
+import com.salesforce.spearhead.evalon.llm.Llm
 import com.salesforce.spearhead.evalon.model.*
 
 /**
- * The ScenarioRunner orchestrates a simulation as an actor system.
+ * The ScenarioRunner orchestrates a simulation as an actor.
  *
  * Each participant is self-driven: they generate responses when messages arrive. The runner
  * delivers messages to direct participants (those in the conversation's `between` list), records
@@ -70,7 +70,7 @@ object ScenarioRunner:
   def apply(
       scenario: Scenario,
       agent: Agent,
-      client: AnthropicClient,
+      llm: Llm,
       onEntry: Option[TranscriptEntry => Unit] = None
   ): Behavior[Command] = Behaviors.receive {
     case (ctx, Run(replyTo)) =>
@@ -98,7 +98,7 @@ object ScenarioRunner:
           )
         case (name, config) =>
           name -> ctx.spawn(
-            SimulatedParticipant(config, client, ctx.self, conversations),
+            SimulatedParticipant(config, llm, ctx.self, conversations),
             s"participant-$name"
           )
       }
@@ -106,7 +106,7 @@ object ScenarioRunner:
       // Spawn event source actors
       val eventSources = scenario.eventSources.map { esConfig =>
         esConfig.name -> ctx.spawn(
-          EventSourceActor(esConfig, client, ctx.self),
+          EventSourceActor(esConfig, llm, ctx.self),
           s"event-source-${esConfig.name}"
         )
       }.toMap
