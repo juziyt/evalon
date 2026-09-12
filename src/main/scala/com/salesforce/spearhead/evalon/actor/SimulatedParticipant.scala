@@ -23,6 +23,8 @@ import scala.util.{Failure, Random, Success}
 import org.apache.pekko.actor.typed.scaladsl.{ActorContext, Behaviors, TimerScheduler}
 import org.apache.pekko.actor.typed.{ActorRef, Behavior}
 
+import io.circe.Json
+
 import com.salesforce.spearhead.evalon.llm.{Llm, ChatMessage}
 import com.salesforce.spearhead.evalon.model.{
   Action,
@@ -96,11 +98,21 @@ object SimulatedParticipant:
         s"""\n\nYou also have an ongoing conversation in "$convName" with $otherParticipants. Recent messages there:\n$lines"""
     }.mkString
 
+    val factsSection =
+      if config.contextFacts == Json.obj() then ""
+      else
+        s"""
+
+Facts you know:
+${config.contextFacts.spaces2}
+
+Provide a fact only if asked and it is in this list; otherwise say you don't have it. Never invent facts, except you may confirm your own name or contact details during identity verification. Never volunteer backend knowledge such as eligibility, fare class, or refund outcome."""
+
     s"""You are role-playing as a simulated participant.
 
 Your name/role: ${config.name}
 Your persona: ${config.persona}
-Your goal: ${config.goal}
+Your goal: ${config.goal}$factsSection
 
 You are currently responding in the "$conversation" conversation with: $others
 Address your response to them. Do NOT address participants from other conversations here.
