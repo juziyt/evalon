@@ -46,8 +46,22 @@ class EvaluatorTest extends AnyFunSuite:
       participants = Map.empty,
       conversations = Nil,
       evalCriteria = List(
-        EvalCriterion("rebooked the flight", 2.0),
-        EvalCriterion("confirmed with the user", 1.0)
+        EvalCriterion(
+          name = "rebooked",
+          description = "rebooked the flight",
+          criterionType = CriterionType.Binary,
+          requireToolCall = true,
+          sourceType = CriterionSourceType.OpProcedure,
+          weight = 2.0,
+        ),
+        EvalCriterion(
+          name = "confirmed",
+          description = "confirmed with the user",
+          criterionType = CriterionType.Binary,
+          requireToolCall = false,
+          sourceType = CriterionSourceType.History,
+          weight = 1.0,
+        ),
       )
     )
 
