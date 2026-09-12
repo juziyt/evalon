@@ -1,10 +1,31 @@
 lazy val PekkoVersion = "1.6.0"
 lazy val SttpVersion = "4.0.26"
 
+// Publishing metadata for Maven Central (via sbt-ci-release / Central Portal).
+// The version is derived from git tags by sbt-dynver — do not set `version` here.
+inThisBuild(Seq(
+  organization := "com.salesforce.spearhead",
+  homepage := Some(url("https://github.com/salesforce/evalon")),
+  licenses := Seq("Apache-2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0.txt")),
+  developers := List(
+    Developer(
+      id = "team-spearhead",
+      name = "Salesforce Spearhead Team",
+      email = "",
+      url = url("https://github.com/salesforce/evalon")
+    )
+  ),
+  scmInfo := Some(ScmInfo(
+    url("https://github.com/salesforce/evalon"),
+    "scm:git:https://github.com/salesforce/evalon.git",
+    "scm:git:git@github.com:salesforce/evalon.git"
+  )),
+  versionScheme := Some("early-semver"),
+))
+
 lazy val root = (project in file("."))
   .settings(
     name := "evalon-core",
-    organization := "com.salesforce.spearhead",
     scalaVersion := "3.8.2",
     headerLicense := Some(HeaderLicense.Custom(
       """|Copyright (c) 2025, Salesforce, Inc.
