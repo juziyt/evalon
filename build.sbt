@@ -4,7 +4,7 @@ lazy val SttpVersion = "4.0.26"
 // Publishing metadata for Maven Central (via sbt-ci-release / Central Portal).
 // The version is derived from git tags by sbt-dynver — do not set `version` here.
 inThisBuild(Seq(
-  organization := "com.salesforce",
+  organization := "com.salesforce.mce",
   homepage := Some(url("https://github.com/salesforce/evalon")),
   licenses := Seq("Apache-2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0.txt")),
   developers := List(
