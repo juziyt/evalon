@@ -53,7 +53,7 @@ sbt "run scenarios/order_refund.yaml"
 
 Releases are published to Maven Central by GitHub Actions (`.github/workflows/release.yml`) via
 [`sbt-ci-release`](https://github.com/sbt/sbt-ci-release). The version is derived from git tags by
-sbt-dynver — pushing a tag `vX.Y.Z` publishes that release; merges to `main` publish a `-SNAPSHOT`.
+sbt-dynver — pushing a tag `vX.Y.Z` publishes that release.
 
 For local testing, publish to your local repository with an explicit version (no tag needed):
 
