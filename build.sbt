@@ -25,7 +25,7 @@ inThisBuild(Seq(
 
 lazy val root = (project in file("."))
   .settings(
-    name := "evalon-core",
+    name := "evalon",
     scalaVersion := "3.8.2",
     headerLicense := Some(HeaderLicense.Custom(
       """|Copyright (c) 2025, Salesforce, Inc.
