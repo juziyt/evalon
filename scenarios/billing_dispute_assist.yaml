@@ -84,42 +84,35 @@ eval_criteria:
     description: "Agent provided guidance to verify customer identity and collect account identifier"
     criterion_type: binary
     require_tool_call: false
-    source_type: history
     tags: [assist, identity]
   - name: recommend_account_lookup
     description: "Agent recommended looking up account details using the customer's email"
     criterion_type: binary
     require_tool_call: false
-    source_type: hybrid
     tags: [assist, tools]
   - name: recommend_transaction_search
     description: "Agent recommended searching for the disputed transaction"
     criterion_type: binary
     require_tool_call: false
-    source_type: hybrid
     tags: [assist, tools]
   - name: check_refund_eligibility
     description: "Agent checked refund eligibility based on account tier and transaction details"
     criterion_type: binary
     require_tool_call: true
-    source_type: op_procedure
     tags: [tools]
   - name: recommend_resolution
     description: "Agent recommended appropriate resolution (full refund, partial refund, credit, or escalation)"
     criterion_type: ordinal
     require_tool_call: false
     pass_threshold: 0.7
-    source_type: history
     tags: [assist]
   - name: rep_follows_without_reveal
     description: "Representative followed guidance naturally without revealing the AI agent to customer"
     criterion_type: binary
     require_tool_call: false
-    source_type: history
     tags: [assist]
   - name: dispute_resolved
     description: "Customer's dispute was resolved with clear explanation of the outcome"
     criterion_type: binary
     require_tool_call: false
-    source_type: hybrid
     weight: 2.0

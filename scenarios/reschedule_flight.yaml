@@ -66,30 +66,25 @@ eval_criteria:
     description: "Agent looked up the customer's current flight status"
     criterion_type: binary
     require_tool_call: true
-    source_type: op_procedure
     tags: [tools]
   - name: search_alternatives
     description: "Agent searched for available alternative flights"
     criterion_type: binary
     require_tool_call: true
-    source_type: op_procedure
     tags: [tools]
   - name: rebook_flight
     description: "Agent successfully rebooked the customer on a new flight"
     criterion_type: binary
     require_tool_call: true
-    source_type: op_procedure
     tags: [tools]
     weight: 2.0
   - name: confirm_new_flight
     description: "Agent confirmed the new flight details with the customer"
     criterion_type: binary
     require_tool_call: false
-    source_type: history
   - name: professional_tone
     description: "Agent was empathetic and professional in tone"
     criterion_type: scored
     require_tool_call: false
     pass_threshold: 0.7
-    source_type: history
     tags: [tone]

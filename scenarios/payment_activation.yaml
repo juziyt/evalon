@@ -63,17 +63,14 @@ eval_criteria:
     description: "Agent verified customer identity before proceeding"
     criterion_type: binary
     require_tool_call: true
-    source_type: op_procedure
     tags: [tools, identity]
   - name: activate_payment_method
     description: "Agent activated the payment method"
     criterion_type: binary
     require_tool_call: true
-    source_type: op_procedure
     tags: [tools]
     weight: 2.0
   - name: confirm_resolution
     description: "Agent confirmed resolution to the customer"
     criterion_type: binary
     require_tool_call: false
-    source_type: history

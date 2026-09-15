@@ -77,8 +77,7 @@ class EvalonRunnerTest extends AnyFunSuite with BeforeAndAfterAll:
           name = "ok",
           description = "ok",
           criterionType = CriterionType.Binary,
-          requireToolCall = false,
-          sourceType = CriterionSourceType.History,
+          requireToolCall = false
         )
       )
     )

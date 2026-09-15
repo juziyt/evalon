@@ -92,30 +92,25 @@ eval_criteria:
     description: "Agent looked up the booking details proactively"
     criterion_type: binary
     require_tool_call: true
-    source_type: op_procedure
     tags: [tools]
   - name: guide_cancellation_policy
     description: "Agent provided clear guidance to the representative about cancellation policy"
     criterion_type: binary
     require_tool_call: false
-    source_type: history
     tags: [assist]
   - name: cancel_via_tool
     description: "Agent performed the cancellation via tool call when appropriate"
     criterion_type: binary
     require_tool_call: true
-    source_type: op_procedure
     tags: [tools]
     weight: 2.0
   - name: rep_follows_without_reveal
     description: "Representative followed the agent's guidance naturally without revealing the agent to the customer"
     criterion_type: binary
     require_tool_call: false
-    source_type: history
     tags: [assist]
   - name: cancellation_processed
     description: "Customer's cancellation was successfully processed with refund details"
     criterion_type: binary
     require_tool_call: false
-    source_type: hybrid
     weight: 2.0

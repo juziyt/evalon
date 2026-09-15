@@ -174,22 +174,19 @@ object ScenarioLoader:
             name = desc,
             description = desc,
             criterionType = CriterionType.Binary,
-            requireToolCall = false,
-            sourceType = CriterionSourceType.History,
+            requireToolCall = false
           )
         )
       case None =>
         val c = json.hcursor
         for
           criterionType <- decodeCriterionType(c)
-          sourceType <- decodeCriterionSourceType(c)
         yield EvalCriterion(
           name = c.downField("name").as[String].toOption.getOrElse(""),
           description = c.downField("description").as[String].toOption.getOrElse(""),
           criterionType = criterionType,
           requireToolCall = c.downField("require_tool_call").as[Boolean].toOption.getOrElse(false),
           passThreshold = c.downField("pass_threshold").as[Double].toOption,
-          sourceType = sourceType,
           tags = c.downField("tags").as[List[String]].toOption.getOrElse(Nil),
           weight = c.downField("weight").as[Double].toOption.getOrElse(1.0),
         )
@@ -204,18 +201,3 @@ object ScenarioLoader:
           case "ordinal" => Right(CriterionType.Ordinal)
           case other =>
             Left(s"Unknown criterion type '$other' (expected binary, scored, or ordinal)")
-
-  private def decodeCriterionSourceType(c: HCursor): Either[String, CriterionSourceType] =
-    c.downField("source_type").as[String].toOption match
-      case None => Right(CriterionSourceType.History)
-      case Some(s) =>
-        s.trim.toLowerCase.replace("-", "_") match
-          case "history" => Right(CriterionSourceType.History)
-          case "op_procedure" => Right(CriterionSourceType.OpProcedure)
-          case "hybrid" => Right(CriterionSourceType.Hybrid)
-          case "manual" => Right(CriterionSourceType.Manual)
-          case other =>
-            Left(
-              s"Unknown criterion source type '$other' (expected history, op_procedure, hybrid, or manual)"
-            )
-

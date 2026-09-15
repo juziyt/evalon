@@ -51,7 +51,6 @@ class EvaluatorTest extends AnyFunSuite:
           description = "rebooked the flight",
           criterionType = CriterionType.Binary,
           requireToolCall = true,
-          sourceType = CriterionSourceType.OpProcedure,
           weight = 2.0,
         ),
         EvalCriterion(
@@ -59,7 +58,6 @@ class EvaluatorTest extends AnyFunSuite:
           description = "confirmed with the user",
           criterionType = CriterionType.Binary,
           requireToolCall = false,
-          sourceType = CriterionSourceType.History,
           weight = 1.0,
         ),
       )
