@@ -122,7 +122,10 @@ Evaluate the agent's performance against each criterion. Use the ground truth da
   private def formatTranscript(transcript: Transcript): String =
     transcript.entries.map { entry =>
       val conv = entry.conversation.map(c => s" ($c)").getOrElse("")
-      entry.message.map { m => s"[${m.sender}]$conv: ${m.content}" }
+      entry.message.map { m =>
+        val trace = m.trace.map(j => s" trace=${j.noSpaces}").getOrElse("")
+        s"[${m.sender}]$conv: ${m.content}\n$trace"
+      }
         .orElse(entry.toolCall.map { tc =>
           s"[tool_call] ${tc.toolName}(${tc.arguments.asJson.noSpaces})"
         })

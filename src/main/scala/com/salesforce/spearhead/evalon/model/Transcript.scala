@@ -39,6 +39,7 @@ object TranscriptEntry:
       fields = ("type" -> "message".asJson) :: fields
       fields = ("sender" -> m.sender.asJson) :: fields
       fields = ("content" -> m.content.asJson) :: fields
+      m.trace.foreach(t => fields = ("trace" -> t) :: fields)
     }
 
     entry.toolCall.foreach { tc =>
@@ -78,11 +79,12 @@ case class Transcript(entries: Vector[TranscriptEntry] = Vector.empty):
     content: String,
     conversation: Option[String] = None,
     durationMs: Option[Long] = None,
+    trace: Option[Json] = None,
   ): Transcript =
     append(
       TranscriptEntry(
         conversation = conversation,
-        message = Some(Message(sender, content)),
+        message = Some(Message(sender, content, trace)),
         durationMs = durationMs,
       )
     )

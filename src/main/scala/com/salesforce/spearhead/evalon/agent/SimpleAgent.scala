@@ -18,6 +18,7 @@
 package com.salesforce.spearhead.evalon.agent
 
 import java.util
+import java.util.Optional
 import java.util.concurrent.CompletionStage
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -25,6 +26,8 @@ import scala.jdk.CollectionConverters.*
 import scala.jdk.FutureConverters.*
 import scala.util.{Failure, Success, Try}
 
+import io.circe.Json
+import io.circe.parser.parse
 import io.circe.syntax.*
 
 import com.salesforce.spearhead.evalon.model.{Action, Event, HistoryEntry}
@@ -33,23 +36,36 @@ import com.salesforce.spearhead.evalon.model.{Action, Event, HistoryEntry}
 final class HistoryTurn(
     private val conversation: String,
     private val sender: String,
-    private val content: String
+    private val content: String,
+    private val trace: Optional[String]
 ):
+  def this(conversation: String, sender: String, content: String) =
+    this(conversation, sender, content, Optional.empty())
   def getConversation: String = conversation
   def getSender: String = sender
   def getContent: String = content
+  /** generation trace for this turn, or empty if none. */
+  def getTrace: Optional[String] = trace
 
 /** Reply from a {@link SimpleAgent} step. */
-final class AgentReply(private val content: String, private val end: Boolean):
+final class AgentReply(
+    private val content: String,
+    private val end: Boolean,
+    private val trace: Optional[String]
+):
+  def this(content: String, end: Boolean) = this(content, end, Optional.empty())
   def getContent: String = content
   def isEnd: Boolean = end
+  /** trace of how this reply was generated, or empty if none. */
+  def getTrace: Optional[String] = trace
 
 object AgentReply:
-  def send(content: String): AgentReply = AgentReply(content, false)
-  def end(): AgentReply = AgentReply("", true)
+  def send(content: String): AgentReply = AgentReply(content, false, Optional.empty())
+  def send(content: String, trace: String): AgentReply =
+    AgentReply(content, false, Optional.ofNullable(trace))
+  def end(): AgentReply = AgentReply("", true, Optional.empty())
 
 /** Simplified evaluated agent: history turns + optional event lines */
-// TODO: add tool trace
 @FunctionalInterface
 trait SimpleAgent:
   def step(
@@ -67,7 +83,9 @@ object SimpleAgent:
           respondIn: String
       ): Future[Action] =
         val turns = history
-          .collect { case HistoryEntry.Turn(c, s, content) => HistoryTurn(c, s, content) }
+          .collect { case HistoryEntry.Turn(c, s, content, trace) =>
+            HistoryTurn(c, s, content, Optional.ofNullable(trace.map(_.noSpaces).orNull))
+          }
           .asJava
         val eventLines = events.map(e => s"${e.name}: ${e.data.asJson.noSpaces}").asJava
         Try(simpleAgent.step(respondIn, turns, eventLines)) match
@@ -76,8 +94,26 @@ object SimpleAgent:
               NullPointerException("SimpleAgent.step must return a non-null CompletionStage")
             )
           case Success(stage) =>
-            stage.asScala.map { reply =>
-              if reply == null || reply.isEnd then Action.End
-              else Action.send(agentName, Option(reply.getContent).getOrElse(""))
+            stage.asScala.flatMap { reply =>
+              if reply == null || reply.isEnd then Future.successful(Action.End)
+              else
+                parseTrace(reply.getTrace).map { trace =>
+                  Action.send(
+                    agentName,
+                    Option(reply.getContent).getOrElse(""),
+                    trace = trace,
+                  )
+                }
             }
           case Failure(e) => Future.failed(e)
+
+  private def parseTrace(raw: Optional[String]): Future[Option[Json]] =
+    Option(raw).filter(_.isPresent).map(_.get).map(_.trim).filter(_.nonEmpty) match
+      case None => Future.successful(None)
+      case Some(s) =>
+        parse(s) match
+          case Right(json) => Future.successful(Some(json))
+          case Left(err) =>
+            Future.failed(
+              IllegalArgumentException(s"AgentReply trace is not valid JSON: ${err.getMessage}")
+            )

@@ -28,17 +28,19 @@ object Signals:
   val NoAction = "[NO_ACTION]"
   val End = "[END]"
 
-case class Message(sender: String, content: String)
+case class Message(sender: String, content: String, trace: Option[Json] = None)
 
 object Message:
   given Encoder[Message] = Encoder.instance { m =>
-    Json.obj("sender" -> m.sender.asJson, "content" -> m.content.asJson)
+    val base = Json.obj("sender" -> m.sender.asJson, "content" -> m.content.asJson)
+    m.trace.fold(base)(t => base.deepMerge(Json.obj("trace" -> t)))
   }
   given Decoder[Message] = Decoder.instance { c =>
     for
       sender <- c.downField("sender").as[String]
       content <- c.downField("content").as[String]
-    yield Message(sender, content)
+      trace <- c.get[Option[Json]]("trace")
+    yield Message(sender, content, trace)
   }
 
 case class ToolCall(toolName: String, arguments: Map[String, Json])
@@ -107,19 +109,24 @@ object ToolInteraction:
 
 /** An action taken by a participant (sent back to the scenario runner). */
 enum Action:
-  case Send(message: Message, toolTrace: List[ToolInteraction] = Nil)
+  case Send(message: Message, toolInteractions: List[ToolInteraction] = Nil)
   case End
 
 object Action:
-  def send(sender: String, content: String, toolTrace: List[ToolInteraction] = Nil): Action =
-    Action.Send(Message(sender, content), toolTrace)
+  def send(
+      sender: String,
+      content: String,
+      toolInteractions: List[ToolInteraction] = Nil,
+      trace: Option[Json] = None,
+  ): Action =
+    Action.Send(Message(sender, content, trace), toolInteractions)
 
   given Encoder[Action] = Encoder.instance {
-    case Action.Send(message, toolTrace) =>
+    case Action.Send(message, toolInteractions) =>
       Json.obj(
         "type" -> "send".asJson,
         "message" -> message.asJson,
-        "tool_trace" -> toolTrace.asJson,
+        "tool_interactions" -> toolInteractions.asJson,
       )
     case Action.End =>
       Json.obj("type" -> "end".asJson)
@@ -129,8 +136,8 @@ object Action:
       case "send" =>
         for
           message <- c.downField("message").as[Message]
-          toolTrace <- c.downField("tool_trace").as[Option[List[ToolInteraction]]]
-        yield Action.Send(message, toolTrace.getOrElse(Nil))
+          toolInteractions <- c.downField("tool_interactions").as[Option[List[ToolInteraction]]]
+        yield Action.Send(message, toolInteractions.getOrElse(Nil))
       case "end" =>
         Right(Action.End)
       case other =>

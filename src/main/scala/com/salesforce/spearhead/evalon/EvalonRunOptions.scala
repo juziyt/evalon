@@ -48,7 +48,8 @@ final class EvalonRunOptions:
     withOnEntry { entry =>
       entry.message.foreach { (m: Message) =>
         val conv = entry.conversation.map(c => s"($c) ").getOrElse("")
-        consumer.accept(s"$conv[${m.sender}]: ${m.content}")
+        val trace = m.trace.map(j => s" ${j.noSpaces}").getOrElse("")
+        consumer.accept(s"$conv[${m.sender}]: ${m.content}$trace")
       }
     }
 
