@@ -36,7 +36,7 @@ case class ParticipantConfig(
   participantType: ParticipantType = ParticipantType.Simulated,
   persona: String = "",
   goal: String = "",
-  contextFacts: Json = Json.obj(),
+  template: Option[String] = None,
   endpoint: Option[String] = None,
   responseSpeed: Option[ResponseSpeed] = None,
 )

@@ -96,7 +96,14 @@ object SimulatedParticipant:
         s"""\n\nYou also have an ongoing conversation in "$convName" with $otherParticipants. Recent messages there:\n$lines"""
     }.mkString
 
-    s"""You are role-playing as a simulated participant.
+    val endInstruction =
+      s"Use ${Signals.End} ONLY when the conversation is genuinely complete: your goal has been achieved or the other party has clearly wrapped up. Never include ${Signals.End} while you are mid-task, waiting for information, or correcting yourself. When in doubt, do not end."
+
+    config.template.map(_.trim).filter(_.nonEmpty) match
+      case Some(template) =>
+        s"$template\n\n$endInstruction$contextSection"
+      case None =>
+        s"""You are role-playing as a simulated participant.
 
 Your name/role: ${config.name}
 Your persona: ${config.persona}
@@ -106,7 +113,7 @@ You are currently responding in the "$conversation" conversation with: $others
 Address your response to them. Do NOT address participants from other conversations here.
 Stay in character. Respond naturally based on the conversation so far.
 
-Use ${Signals.End} ONLY when the conversation is genuinely complete: your goal has been achieved or the other party has clearly wrapped up. Never include ${Signals.End} while you are mid-task, waiting for information, or correcting yourself. When in doubt, do not end.
+$endInstruction
 
 Respond with only your message content. Your output is delivered to the other party as-is.$contextSection"""
 

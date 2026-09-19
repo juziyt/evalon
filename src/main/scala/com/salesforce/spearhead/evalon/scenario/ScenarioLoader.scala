@@ -90,7 +90,7 @@ object ScenarioLoader:
                   participantType = pType,
                   persona = c.downField("persona").as[String].getOrElse(""),
                   goal = c.downField("goal").as[String].getOrElse(""),
-                  contextFacts = c.downField("context_facts").focus.getOrElse(Json.obj()),
+                  template = c.downField("template").as[String].toOption,
                   endpoint = c.downField("endpoint").as[String].toOption,
                   responseSpeed = responseSpeed,
                 )
