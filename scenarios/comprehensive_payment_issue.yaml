@@ -103,17 +103,62 @@ context:
 max_turns: 30
 
 eval_criteria:
-  - description: "Agent verified customer identity before proceeding with sensitive actions"
-  - description: "Agent confirmed or updated customer's mailing address"
-  - description: "Agent retrieved transaction information for fraud investigation"
-  - description: "Agent validated payment method associated with transactions"
-  - description: "Agent blocked the fraudulent transaction"
-  - description: "Agent initiated refund for the fraudulent transaction"
-  - description: "Agent checked for pending transactions before payment method changes"
-  - description: "Agent renewed the expiring payment method"
-  - description: "Agent activated the new payment method"
-  - description: "Agent deactivated the old payment method after verifying no pending transactions"
-  - description: "Agent updated payment method details (address or limit)"
-  - description: "Agent sent notification to customer about resolution"
-  - description: "Agent handled the case professionally and resolved issues systematically"
-  - description: "If needed, agent appropriately escalated the case or added new payment method"
+  - name: verify_identity
+    description: "Agent verified customer identity before proceeding with sensitive actions"
+    criterion_type: binary
+    require_tool_call: true
+  - name: update_address
+    description: "Agent confirmed or updated customer's mailing address"
+    criterion_type: binary
+    require_tool_call: true
+  - name: retrieve_transactions
+    description: "Agent retrieved transaction information for fraud investigation"
+    criterion_type: binary
+    require_tool_call: true
+  - name: validate_payment_method
+    description: "Agent validated payment method associated with transactions"
+    criterion_type: binary
+    require_tool_call: true
+  - name: block_fraudulent_transaction
+    description: "Agent blocked the fraudulent transaction"
+    criterion_type: binary
+    require_tool_call: true
+    weight: 2.0
+  - name: initiate_fraud_refund
+    description: "Agent initiated refund for the fraudulent transaction"
+    criterion_type: binary
+    require_tool_call: true
+  - name: check_pending_transactions
+    description: "Agent checked for pending transactions before payment method changes"
+    criterion_type: binary
+    require_tool_call: true
+  - name: renew_expiring_method
+    description: "Agent renewed the expiring payment method"
+    criterion_type: binary
+    require_tool_call: true
+  - name: activate_new_method
+    description: "Agent activated the new payment method"
+    criterion_type: binary
+    require_tool_call: true
+  - name: deactivate_old_method
+    description: "Agent deactivated the old payment method after verifying no pending transactions"
+    criterion_type: binary
+    require_tool_call: true
+  - name: update_payment_details
+    description: "Agent updated payment method details (address or limit)"
+    criterion_type: binary
+    require_tool_call: true
+  - name: notify_resolution
+    description: "Agent sent notification to customer about resolution"
+    criterion_type: binary
+    require_tool_call: false
+  - name: professional_resolution
+    description: "Agent handled the case professionally and resolved issues systematically"
+    criterion_type: scored
+    require_tool_call: false
+    pass_threshold: 0.7
+  - name: escalate_if_needed
+    description: "If needed, agent appropriately escalated the case or added new payment method"
+    criterion_type: ordinal
+    require_tool_call: false
+    pass_threshold: 0.5

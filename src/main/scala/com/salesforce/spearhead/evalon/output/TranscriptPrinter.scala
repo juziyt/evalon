@@ -84,7 +84,8 @@ class TranscriptPrinter(showConversation: Boolean = false, convWidth: Int = 14):
       val sender = m.sender.toUpperCase
       val color = if m.sender == "agent" then Blue else senderColor(m.sender)
       val tag = coloredTag(color, icon + sender)
-      println(formatLine(tag, entry.conversation, m.content) + suffix + "\n")
+      val body = m.trace.fold(m.content)(j => s"${m.content}  $Dim${j.noSpaces}$Reset")
+      println(formatLine(tag, entry.conversation, body) + suffix + "\n")
     }
 
     entry.toolCall.foreach { tc =>

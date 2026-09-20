@@ -55,7 +55,7 @@ class ClaudeAgent(
       respondIn: String,
   ): Future[Action] =
     val baseMessages = history.map {
-      case HistoryEntry.Turn(conversation, sender, content) =>
+      case HistoryEntry.Turn(conversation, sender, content, _) =>
         Json.obj(
           "role" -> "user".asJson,
           "content" -> s"[$sender in $conversation]: $content".asJson,
@@ -92,13 +92,13 @@ class ClaudeAgent(
   private def run(initialMessages: List[Json]): Future[Action] =
     var messages: List[Json] = initialMessages
 
-    def loop(remainingRounds: Int, toolTrace: List[ToolInteraction]): Future[Action] =
+    def loop(remainingRounds: Int, toolInteractions: List[ToolInteraction]): Future[Action] =
       if remainingRounds <= 0 then
         // Exhausted the tool-use budget without a final answer. Return a visible message (not an
         // empty send, which the runner would drop) so the give-up is recorded and scoreable.
         val message =
           s"Reached the maximum of $maxToolRounds tool-use rounds without completing the request."
-        Future.successful(Action.send(agentName, message, toolTrace))
+        Future.successful(Action.send(agentName, message, toolInteractions))
       else
         val request = CreateMessageRequest(
           model = model,
@@ -144,7 +144,7 @@ class ClaudeAgent(
 
           if toolUseBlocks.isEmpty then
             val content = textContent.getOrElse("")
-            Future.successful(Action.send(agentName, content, toolTrace))
+            Future.successful(Action.send(agentName, content, toolInteractions))
           else
             val toolFutures = toolUseBlocks.map { (id, tc) =>
               tools.get(tc.toolName) match
@@ -173,7 +173,7 @@ class ClaudeAgent(
                 "role" -> "user".asJson,
                 "content" -> resultBlocks.asJson,
               )
-              loop(remainingRounds - 1, toolTrace ++ newInteractions)
+              loop(remainingRounds - 1, toolInteractions ++ newInteractions)
             }
         }
 

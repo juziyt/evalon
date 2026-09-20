@@ -64,7 +64,7 @@ object EvaluatedAgent:
       history: List[HistoryEntry]
   ): Behavior[Participant.Command | AgentResult] = Behaviors.receive {
     case (ctx, Participant.ReceiveMessage(msg, conversation)) =>
-      val newHistory = history :+ HistoryEntry.Turn(conversation, msg.sender, msg.content)
+      val newHistory = history :+ HistoryEntry.Turn(conversation, msg.sender, msg.content, msg.trace)
       startStep(
         agent,
         runner,
@@ -106,7 +106,8 @@ object EvaluatedAgent:
       val conv = e.data.get("conversation").flatMap(_.asString).getOrElse("unknown")
       val sender = e.data.get("sender").flatMap(_.asString).getOrElse("unknown")
       val content = e.data.get("content").flatMap(_.asString).getOrElse("")
-      HistoryEntry.Turn(conv, sender, content)
+      val trace = e.data.get("trace")
+      HistoryEntry.Turn(conv, sender, content, trace)
     }
     (history ++ turns, systemEvents)
 
@@ -121,11 +122,11 @@ object EvaluatedAgent:
   ): List[HistoryEntry] =
     action match
       case Action.End => history
-      case Action.Send(message, toolTrace) =>
-        val toolEntries = toolTrace.map(HistoryEntry.ToolUse(conversation, _))
+      case Action.Send(message, toolInteractions) =>
+        val toolEntries = toolInteractions.map(HistoryEntry.ToolUse(conversation, _))
         val msgEntry =
           if message.content.isEmpty then None
-          else Some(HistoryEntry.Turn(conversation, agentName, message.content))
+          else Some(HistoryEntry.Turn(conversation, agentName, message.content, message.trace))
         history ++ toolEntries ++ msgEntry
 
   private def generating(
@@ -137,7 +138,7 @@ object EvaluatedAgent:
       pending: Pending
   ): Behavior[Participant.Command | AgentResult] = Behaviors.receive {
     case (_, Participant.ReceiveMessage(msg, conversation)) =>
-      val newHistory = history :+ HistoryEntry.Turn(conversation, msg.sender, msg.content)
+      val newHistory = history :+ HistoryEntry.Turn(conversation, msg.sender, msg.content, msg.trace)
       val newPending = pending.copy(conversations = pending.conversations + conversation)
       generating(agent, runner, agentName, directConversations, newHistory, newPending)
 

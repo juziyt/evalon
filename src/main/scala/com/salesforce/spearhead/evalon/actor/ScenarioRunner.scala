@@ -229,7 +229,7 @@ object ScenarioRunner:
       conversation: String
   ): RunState =
     // Record tool interactions
-    val toolEntries = send.toolTrace.flatMap { interaction =>
+    val toolEntries = send.toolInteractions.flatMap { interaction =>
       List(
         TranscriptEntry(conversation = Some(conversation), toolCall = Some(interaction.call)),
         TranscriptEntry(conversation = Some(conversation), toolResult = Some(interaction.result))

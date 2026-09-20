@@ -82,7 +82,10 @@ Only emit events when clearly warranted by observed activity. Do not emit events
             .replace("{emits}", emitsDesc)
 
           val activityLog = updated.flatMap { e =>
-            e.message.map(m => s"[${m.sender}]: ${m.content}")
+            e.message.map { m =>
+              val trace = m.trace.map(j => s" ${j.noSpaces}").getOrElse("")
+              s"[${m.sender}]: ${m.content}$trace"
+            }
               .orElse(e.event.map(ev => s"[event: ${ev.name}] ${ev.data.asJson.noSpaces}"))
           }.mkString("\n")
 

@@ -46,6 +46,16 @@ context:
 max_turns: 10
 
 eval_criteria:
-  - description: "Agent verified customer identity before proceeding"
-  - description: "Agent activated the payment method"
-  - description: "Agent confirmed resolution to the customer"
+  - name: verify_identity
+    description: "Agent verified customer identity before proceeding"
+    criterion_type: binary
+    require_tool_call: true
+  - name: activate_payment_method
+    description: "Agent activated the payment method"
+    criterion_type: binary
+    require_tool_call: true
+    weight: 2.0
+  - name: confirm_resolution
+    description: "Agent confirmed resolution to the customer"
+    criterion_type: binary
+    require_tool_call: false

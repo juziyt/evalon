@@ -27,18 +27,19 @@ import io.circe.syntax.*
   * re-executing actions across steps.
   */
 enum HistoryEntry:
-  case Turn(conversation: String, sender: String, content: String)
+  case Turn(conversation: String, sender: String, content: String, trace: Option[Json] = None)
   case ToolUse(conversation: String, interaction: ToolInteraction)
 
 object HistoryEntry:
   given Encoder[HistoryEntry] = Encoder.instance {
-    case HistoryEntry.Turn(conversation, sender, content) =>
-      Json.obj(
+    case HistoryEntry.Turn(conversation, sender, content, trace) =>
+      val base = Json.obj(
         "type" -> "turn".asJson,
         "conversation" -> conversation.asJson,
         "sender" -> sender.asJson,
         "content" -> content.asJson,
       )
+      trace.fold(base)(t => base.deepMerge(Json.obj("trace" -> t)))
     case HistoryEntry.ToolUse(conversation, interaction) =>
       Json.obj(
         "type" -> "tool_use".asJson,
@@ -53,7 +54,8 @@ object HistoryEntry:
           conversation <- c.downField("conversation").as[String]
           sender <- c.downField("sender").as[String]
           content <- c.downField("content").as[String]
-        yield HistoryEntry.Turn(conversation, sender, content)
+          trace <- c.get[Option[Json]]("trace")
+        yield HistoryEntry.Turn(conversation, sender, content, trace)
       case "tool_use" =>
         for
           conversation <- c.downField("conversation").as[String]

@@ -71,8 +71,25 @@ context:
 max_turns: 20
 
 eval_criteria:
-  - description: "Agent looked up the booking details proactively"
-  - description: "Agent provided clear guidance to the representative about cancellation policy"
-  - description: "Agent performed the cancellation via tool call when appropriate"
-  - description: "Representative followed the agent's guidance naturally without revealing the agent to the customer"
-  - description: "Customer's cancellation was successfully processed with refund details"
+  - name: lookup_booking
+    description: "Agent looked up the booking details proactively"
+    criterion_type: binary
+    require_tool_call: true
+  - name: guide_cancellation_policy
+    description: "Agent provided clear guidance to the representative about cancellation policy"
+    criterion_type: binary
+    require_tool_call: false
+  - name: cancel_via_tool
+    description: "Agent performed the cancellation via tool call when appropriate"
+    criterion_type: binary
+    require_tool_call: true
+    weight: 2.0
+  - name: rep_follows_without_reveal
+    description: "Representative followed the agent's guidance naturally without revealing the agent to the customer"
+    criterion_type: binary
+    require_tool_call: false
+  - name: cancellation_processed
+    description: "Customer's cancellation was successfully processed with refund details"
+    criterion_type: binary
+    require_tool_call: false
+    weight: 2.0
