@@ -126,6 +126,7 @@ $outputFormatPrompt"""
         scenarioName = scenario.name,
         criterionResults = criterionResults,
         overallScore = overallScore,
+        overallPassed = criterionResults.forall(_.passed),
         summary = criterionResults.map(_.reasoning).filter(_.nonEmpty).mkString("; "),
       )
     }
